@@ -1,7 +1,7 @@
 #!/bin/bash
 # ~/bin/pelis.sh
 # CRE: 14/01/2020
-# v1.1
+# v1.2
 
 ### PENDIENTE ###
 # Guardar el resultado de la búsqueda en un array y mostrarlo en pantalla con la opción de ver más detalles de los resultados
@@ -15,6 +15,9 @@
 # Busca cadenas en el registro de películas. Si se busca una fecha hay que ponerlo entre comillas pelisbacklog.sh "(1998)"
 
 ## MEJORAS ##
+# v1.2
+# Modificadas rutas a películas y logs para hacer el código más fácil.
+# Arreglado el condicional para la opción de búsqueda de cadenas en el resgistro de películas.
 # v1.1
 # Añadida función de búsqueda de cadenas en el registro existente.
 # Al añadir cualquier parámetro realiza la búsqueda y sale sin hacer un listado o registros nuevos.
@@ -23,23 +26,21 @@
 
 ## VARIABLES ##
 # Unidad donde están almacenadas las películas
-ruta_RAIZ='/home/pi'
+ruta_PELIS="$HOME/cine"
 # Directorio raiz de las películas
 dir_CINE='cine'
 # Ubicación de los logs
-dir_LOGS='logs'
+ruta_LOGS="$HOME/logs"
 # Archivo de registro
 file_LOG='pelis.log'
 # Grupos de películas (subdirectorios)
 arr_GRUPOS="[dual] [es] [lat] [VDE] [VO] [VOSE]"
 
 
-# Ubicación de las películas
-ruta_DIRECTORIO="$ruta_RAIZ/$dir_CINE/"
 # Listado de las películas
-log_LISTA="$ruta_RAIZ/$dir_LOGS/$file_LOG"
+log_LISTA="$ruta_LOGS/$file_LOG"
 # Ubicación de los archivos resumen de las películas
-ruta_ARCHIVOS="$ruta_RAIZ/$dir_LOGS/$dir_CINE/"
+ruta_ARCHIVOS="$ruta_LOGS/$dir_CINE/"
 
 ## TEXTOS ##
 txt_ALMOHADILLAS="#########"
@@ -51,7 +52,7 @@ txt_INICIO="Listado $(date +%F)"
 # [[ -z "$@" ]] || echo "$@"
 # [[ -z "$@" ]] || grep $1 $log_LISTA
 # [[ -z "$@" ]] || export GREP_OPTIONS='--color=auto' GREP_COLOR='333;2' && grep "$1" $log_LISTA
-[[ -z "$@" ]] || grep -i "${*}" $log_LISTA && wait $! && exit 0
+[[ "$#" -gt 0 ]] && grep -i "${*}" $log_LISTA && wait $! && exit 0
 
 i=0
 
@@ -81,6 +82,6 @@ do
 	ls -Qsh "$peli" > "$ruta_ARCHIVOS$dir.$pelif.log"
    fi
   i=1
- done < <(find "$ruta_DIRECTORIO$dir" -maxdepth 1 -type d | sort | uniq)
+ done < <(find "$ruta_PELIS/$dir" -maxdepth 1 -type d | sort | uniq)
 i=0
 done
