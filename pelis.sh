@@ -1,20 +1,23 @@
 #!/bin/bash
 # ~/bin/pelis.sh
 # CRE: 14/01/2020
-# v1.2
+# v1.3
 
 ### PENDIENTE ###
-# Guardar el resultado de la búsqueda en un array y mostrarlo en pantalla con la opción de ver más detalles de los resultados
-# mostrando el nombre y tamaño de la película.
-# Poder mostrar resultados de búsqueda en los dos listados para comprobar coincidencias
+# Crear un listado para el disco de respaldo (listo)
+# Leer el disco principal 'seagate 5TB' y por cada película hacer una búsqueda en el listado anterior. (de momento con fechas de estreno)
+# Si encuentra una coincidencia copia el nombre de la película en un nuevo archivo.
 
 ### USO ###
 # Crea una lista de mi colección de películas
 # Recorre los subdirectorios del array 'GRUPOS'
 # Crea un archivo por cada película con el nombre del archivo de video y su tamaño.
-# Busca cadenas en el registro de películas. Si se busca una fecha hay que ponerlo entre comillas pelisbacklog.sh "(1998)"
+# Busca cadenas en el registro de películas. Si se busca una fecha hay que ponerlo entre comillas 'pelis.sh -b "(1998)"'
 
 ## MEJORAS ##
+# v1.3
+# Manejo de parámetros con opciones de búsqueda, comparación, listados y ayuda.
+# Diferentes opciones de uso ordenadas en funciones.
 # v1.2
 # Modificadas rutas a películas y logs para hacer el código más fácil.
 # Arreglado el condicional para la opción de búsqueda de cadenas en el resgistro de películas.
@@ -47,20 +50,29 @@ txt_ALMOHADILLAS="#########"
 txt_SEPARADOR="------------------------------------------------------------------------------------------"
 txt_INICIO="Listado $(date +%F)"
 
-## CONTROL ##
-# [[ -z "$1" ]] || echo "$1"
-# [[ -z "$@" ]] || echo "$@"
-# [[ -z "$@" ]] || grep $1 $log_LISTA
-# [[ -z "$@" ]] || export GREP_OPTIONS='--color=auto' GREP_COLOR='333;2' && grep "$1" $log_LISTA
-[[ "$#" -gt 0 ]] && grep -i "${*}" $log_LISTA && wait $! && exit 0
-
 i=0
 
-## Si no existen los directorios donde se guardan los registros los creo ##
-[[ -d '$ruta_ARCHIVOS' ]] || mkdir -p "$ruta_ARCHIVOS"
+CODIGO=$0
 
-## CÓDIGO ##
+function usage {
+    echo "uso: ${CODIGO##*/} [-clht] [-b CADENA]"
+    echo "  -c      compara el listado con los archivos del disco"
+    echo "  -d      muestra el uso de disco de las películas"
+    echo "  -l      genera nuevos listados"
+    echo "  -h      muestra la ayuda"
+    echo "  -t      función de test"
+    echo "  -b CADENA   busca películas coincidentes con la cadena"
+    exit 1
+}
 
+function uso_disco {
+ sudo du -h -d1 $ruta_PELIS
+}
+
+function listados {
+  crea_estructura_logs
+  # Comienzo del registro
+  echo "$txt_INICIO" > "$log_LISTA"
 # Comienzo del registro
 echo "$txt_INICIO" > "$log_LISTA"
 
@@ -69,6 +81,7 @@ for dir in $arr_GRUPOS
 do
  while read peli
  do
+#  wc -c "$peli" | awk '{print ($1)}'
   pelif=${peli##*/}
   if [[ $i -eq 0 ]]
    then
@@ -78,10 +91,71 @@ do
      echo $txt_SEPARADOR >> "$log_LISTA"
      echo "$txt_ALMOHADILLAS $dir $txt_ALMOHADILLAS" >> "$log_LISTA"
    else
-	echo "$pelif" >> "$log_LISTA"
-	ls -Qsh "$peli" > "$ruta_ARCHIVOS$dir.$pelif.log"
+        echo "$pelif" >> "$log_LISTA"
+        ls -Qsh "$peli" > "$ruta_ARCHIVOS$dir.$pelif.log"
    fi
   i=1
  done < <(find "$ruta_PELIS/$dir" -maxdepth 1 -type d | sort | uniq)
 i=0
 done
+}
+
+function crea_estructura_logs {
+  # Si no existen los directorios donde se guardan los registros los creo.
+  [[ -d '$ruta_ARCHIVOS' ]] || mkdir -p "$ruta_ARCHIVOS"
+}
+
+function test {
+# Código de testeo sobre tratamiento de cadenas
+# Explorando la posibilidad de añadir la información de tamaño de los archivos o directorios.
+for dir in $arr_GRUPOS
+do
+ while read peli
+ do
+  echo "$peli" | awk '{print ($1)}'
+  anyo="${peli##*\ }"
+  pelicula="${peli##*/}"
+  titulo="${pelicula%\ *}"
+  echo "titulo: $titulo"
+  echo "año: $anyo"
+  pelif=
+  echo $peli | cut -d' ' -f1
+  echo $peli | cut -d' ' -f2
+  echo $peli | cut -d' ' -f3
+  vars=( $peli )
+  echo "Number of words in vars: '${#vars[@]}'"
+  echo ${vars[0]}
+  echo ${vars[1]}
+  echo ${vars[2]}
+
+#  wc -c "$peli" | awk '{print ($1)}'
+
+ done < <(du -h -d1 "$ruta_PELIS/$dir" | sort)
+i=0
+done
+}
+
+## PARÁMETROS ##
+
+while getopts b:cdhlt option
+do
+case "${option}"
+in
+b) grep -i "${OPTARG[*]}" $log_LISTA && wait $! && exit 0;;
+c) COMPARAR=1
+   exit 0;;
+d) uso_disco
+   exit 0;;
+h) usage;;
+l) listados
+   exit 0;;
+t) test
+   exit 0;;
+\?) echo "ERROR: argumento no aceptado en este programa"
+   usage;;
+esac
+done
+
+echo "ERROR: argumento no aceptado en este programa"
+usage
+exit 1
