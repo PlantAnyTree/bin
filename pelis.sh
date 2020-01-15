@@ -1,30 +1,41 @@
 #!/bin/bash
 # ~/bin/pelis.sh
 # CRE: 14/01/2020
-# v1.3
+# v1.4
 
 ### PENDIENTE ###
-# Crear un listado para el disco de respaldo (listo)
-# Leer el disco principal 'seagate 5TB' y por cada película hacer una búsqueda en el listado anterior. (de momento con fechas de estreno)
-# Si encuentra una coincidencia copia el nombre de la película en un nuevo archivo.
+# Crear un menú para eliminar duplicados
 
-### USO ###
-# Crea una lista de mi colección de películas
-# Recorre los subdirectorios del array 'GRUPOS'
+### USOS ###
+## LISTADOS ##
+# '-l' -> Crea una lista de mis películas de respaldo.
 # Crea un archivo por cada película con el nombre del archivo de video y su tamaño.
-# Busca cadenas en el registro de películas. Si se busca una fecha hay que ponerlo entre comillas 'pelis.sh -b "(1998)"'
+## COPIAS ##
+# '-c' -> Recorre la colección de películas y busca coincidencias en la lista de películas de respaldo.
+## BÚSQUEDA ##
+# '-b' -> Busca películas en la lista de películas de respaldo con una 'cadena'.
+# Para buscar fechas o cadenas con espacios se debe entrecomillar 'pelis.sh -b "(1998)"'
+## USO DE DISCO ##
+# '-d' -> Muestra la cantidad de espacio de disco usada por las películas.
+## AYUDA ##
+# '-h' -> Muestra la ayuda del programa con las distintas opciones
+## TEST ##
+# '-t' -> Código de prueba para proóximos desarrollos.
 
 ## MEJORAS ##
-# v1.3
+# 'v1.4'
+# Mejora en la presentación y explicación del código.
+# Crea un listado con duplicados en el disco de respaldo de las películas de ciertos directorios: '[dual]' '[es]' y '[lat]'
+# 'v1.3'
 # Manejo de parámetros con opciones de búsqueda, comparación, listados y ayuda.
 # Diferentes opciones de uso ordenadas en funciones.
-# v1.2
+# 'v1.2'
 # Modificadas rutas a películas y logs para hacer el código más fácil.
 # Arreglado el condicional para la opción de búsqueda de cadenas en el resgistro de películas.
-# v1.1
+# 'v1.1'
 # Añadida función de búsqueda de cadenas en el registro existente.
 # Al añadir cualquier parámetro realiza la búsqueda y sale sin hacer un listado o registros nuevos.
-# v1.0
+# 'v1.0'
 # Si no existen los directorios donde se guardan los registros, se crean.
 
 ## VARIABLES ##
@@ -39,6 +50,14 @@ file_LOG='pelis.log'
 # Grupos de películas (subdirectorios)
 arr_GRUPOS="[dual] [es] [lat] [VDE] [VO] [VOSE]"
 
+# Registro de películas repetidas
+file_DUPES='duplicados.log'
+# Ruta a disco principal
+ruta_CINE="/var/media/Cine"
+# Películas de las que buscar duplicados
+arr_DUPES="[dual] [es] [lat]"
+# Ubicación del listado de duplicados
+log_DUPES="$ruta_LOGS/$file_DUPES"
 
 # Listado de las películas
 log_LISTA="$ruta_LOGS/$file_LOG"
@@ -63,6 +82,36 @@ function usage {
     echo "  -t      función de test"
     echo "  -b CADENA   busca películas coincidentes con la cadena"
     exit 1
+}
+
+function dupes {
+# Comienzo del registro
+rm "$log_DUPES"
+
+# Recorrido por los grupos
+for dir in $arr_DUPES
+do
+ while read peli
+ do
+#  wc -c "$peli" | awk '{print ($1)}'
+  pelif=${peli##*/}
+  if [[ $i -eq 0 ]]
+   then
+     echo "Directorio de búsqueda: $pelif" # El primer resultado es el directorio principal
+     directorio="$pelif"
+   else
+        grep "$pelif" "$log_LISTA" >> $log_DUPES
+	while read file
+	do
+            FILESIZE=$(stat -c%s "$file")
+            echo "$(( FILESIZE / 1048576 )) MB. $file" >> $log_DUPES
+	done < <(find $ruta_PELIS -type f -iname "${pelif}*" | sort)
+	echo "" >> $log_DUPES
+   fi
+  i=1
+ done < <(find "$ruta_CINE/$dir" -maxdepth 1 -type d | sort | uniq)
+i=0
+done
 }
 
 function uso_disco {
@@ -142,7 +191,9 @@ do
 case "${option}"
 in
 b) grep -i "${OPTARG[*]}" $log_LISTA && wait $! && exit 0;;
-c) COMPARAR=1
+c) dupes
+   wait $!
+   cat "$log_DUPES"
    exit 0;;
 d) uso_disco
    exit 0;;
