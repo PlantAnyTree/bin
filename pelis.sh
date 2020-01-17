@@ -1,16 +1,17 @@
 #!/bin/bash
 # ~/bin/pelis.sh
 # CRE: 14/01/2020
-# v1.4
+# v1.41
 
 ### PENDIENTE ###
 # Crear un menú para eliminar duplicados
+# Sincronizar contenido
 
 ### USOS ###
 ## LISTADOS ##
 # '-l' -> Crea una lista de mis películas de respaldo.
 # Crea un archivo por cada película con el nombre del archivo de video y su tamaño.
-## COPIAS ##
+## COPIAS - Versión de test ##
 # '-c' -> Recorre la colección de películas y busca coincidencias en la lista de películas de respaldo.
 ## BÚSQUEDA ##
 # '-b' -> Busca películas en la lista de películas de respaldo con una 'cadena'.
@@ -19,10 +20,13 @@
 # '-d' -> Muestra la cantidad de espacio de disco usada por las películas.
 ## AYUDA ##
 # '-h' -> Muestra la ayuda del programa con las distintas opciones
+# '-s' -> Sincroniza la videoteca con el disco de respaldo. Voy a hacer uso del comando diff
 ## TEST ##
 # '-t' -> Código de prueba para proóximos desarrollos.
 
 ## MEJORAS ##
+# 'v1.5'
+# Mejora en el formato del registro de duplicados: 'function dupes{}'
 # 'v1.4'
 # Mejora en la presentación y explicación del código.
 # Crea un listado con duplicados en el disco de respaldo de las películas de ciertos directorios: '[dual]' '[es]' y '[lat]'
@@ -39,15 +43,15 @@
 # Si no existen los directorios donde se guardan los registros, se crean.
 
 ## VARIABLES ##
-# Unidad donde están almacenadas las películas
+# Unidad donde están almacenadas los respaldos de las películas
 ruta_PELIS="$HOME/cine"
-# Directorio raiz de las películas
+# Directorio de los logs de las películas
 dir_CINE='cine'
 # Ubicación de los logs
 ruta_LOGS="$HOME/logs"
-# Archivo de registro
+# Archivo de registro de respaldos
 file_LOG='pelis.log'
-# Grupos de películas (subdirectorios)
+# Grupos de películas donde buscar duplicados
 arr_GRUPOS="[dual] [es] [lat] [VDE] [VO] [VOSE]"
 
 # Registro de películas repetidas
@@ -55,13 +59,13 @@ file_DUPES='duplicados.log'
 # Ruta a disco principal
 ruta_CINE="/var/media/Cine"
 # Películas de las que buscar duplicados
-arr_DUPES="[dual] [es] [lat]"
+arr_DUPES="[dual] [es] [lat] [VDE] [VO]"
 # Ubicación del listado de duplicados
 log_DUPES="$ruta_LOGS/$file_DUPES"
 
 # Listado de las películas
 log_LISTA="$ruta_LOGS/$file_LOG"
-# Ubicación de los archivos resumen de las películas
+# Ubicación de los archivos resumen de los respaldos
 ruta_ARCHIVOS="$ruta_LOGS/$dir_CINE/"
 
 ## TEXTOS ##
@@ -74,18 +78,23 @@ i=0
 CODIGO=$0
 
 function usage {
-    echo "uso: ${CODIGO##*/} [-clht] [-b CADENA]"
+    echo "uso: ${CODIGO##*/} [-b CADENA] [-c][-d][-h][-l][-s][-t]"
+    echo "  -b CADENA   busca películas coincidentes con la cadena"
     echo "  -c      compara el listado con los archivos del disco"
     echo "  -d      muestra el uso de disco de las películas"
-    echo "  -l      genera nuevos listados"
     echo "  -h      muestra la ayuda"
+    echo "  -l      genera nuevos listados"
+    echo "  -s      sincroniza la videoteca con el disco de respaldo"
     echo "  -t      función de test"
-    echo "  -b CADENA   busca películas coincidentes con la cadena"
     exit 1
 }
 
+function sincronizar {
+ echo "sincronizando"
+}
+
 function dupes {
-# Comienzo del registro
+# Elimino el registro anterior
 rm "$log_DUPES"
 
 # Recorrido por los grupos
@@ -93,20 +102,18 @@ for dir in $arr_DUPES
 do
  while read peli
  do
-#  wc -c "$peli" | awk '{print ($1)}'
   pelif=${peli##*/}
   if [[ $i -eq 0 ]]
    then
      echo "Directorio de búsqueda: $pelif" # El primer resultado es el directorio principal
      directorio="$pelif"
    else
-        grep "$pelif" "$log_LISTA" >> $log_DUPES
+#        grep "$pelif" "$log_LISTA" >> $log_DUPES
 	while read file
 	do
-            FILESIZE=$(stat -c%s "$file")
-            echo "$(( FILESIZE / 1048576 )) MB. $file" >> $log_DUPES
+            peso=$(stat -c '%s' "$file" | numfmt --to=iec)
+            echo "$peso: $dir / $pelif" >> $log_DUPES
 	done < <(find $ruta_PELIS -type f -iname "${pelif}*" | sort)
-	echo "" >> $log_DUPES
    fi
   i=1
  done < <(find "$ruta_CINE/$dir" -maxdepth 1 -type d | sort | uniq)
@@ -186,7 +193,7 @@ done
 
 ## PARÁMETROS ##
 
-while getopts b:cdhlt option
+while getopts b:cdhlst option
 do
 case "${option}"
 in
@@ -199,6 +206,8 @@ d) uso_disco
    exit 0;;
 h) usage;;
 l) listados
+   exit 0;;
+s) sincronizar
    exit 0;;
 t) test
    exit 0;;
