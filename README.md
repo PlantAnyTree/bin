@@ -6,4 +6,5 @@ Código para mi servidor Plex-Kodi, sobre raspbian lite, ejecutándose en una Ra
 ## tempcontrol.sh
 . Registra temperaturas altas en el procesador
 . En caso de superar un cierto límite apaga la Rpi.
-. Se ejecuta desde 'crontab'
+. Se puede ejecutar desde 'crontab' cada ciertos minutos
+. Permite también solicitar la info desde la terminal.
