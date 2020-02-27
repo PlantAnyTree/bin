@@ -10,12 +10,13 @@ Ahora, también incluye las funciones que ejecutaba 'pelisorden.sh'
    * Renombra los archivos de video incorporando etiquetas sobre idioma y formato.  
    * Mueve los directorios con los videos al directorio correspondiente en mi videoteca.  
    * Elimina archivos de publicidad o innecesarios descargados con los videos.  
-3. Busca películas sin respaldo y guarda una copia
-```pelis.sh -r dual```
+3. Busca películas sin respaldo y guarda una copia  
    * En este ejemplo, busca en el directorio 'dual' del respaldo por películas que no se encuentren en la videoteca.  
    * Una vez encontrada una película la copia a la videoteca.  
    * Después de copiar la película acaba el programa.  
    * Este comportamiento permite que se ejecute desde el crontab cada cierto tiempo y que no ocupe demasiados recursos durante demasiado tiempo.  
+   **Ejemplos:**
+   ```pelis.sh -r dual```
 4. Recupera una película perdida desde el respaldo
 ***
 ## tempcontrol.sh
