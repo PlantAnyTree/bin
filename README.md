@@ -15,6 +15,8 @@ Ahora, también incluye las funciones que ejecutaba -'pelisorden.sh'-
    * Una vez encontrada una película la copia a la videoteca.  
    * Después de copiar la película acaba el programa.  
    * Este comportamiento permite que se ejecute desde el crontab cada cierto tiempo y que no ocupe demasiados recursos durante demasiado tiempo.  
+4. Recupera una película perdida desde el respaldo.  
+
 **Ejemplos:**  
    ```pelis.sh -r dual```  
    ```pelis.sh -i VDE```  
@@ -27,7 +29,6 @@ Ahora, también incluye las funciones que ejecutaba -'pelisorden.sh'-
     * [VDL]
     * [VO]
     * [VOSE]
-4. Recupera una película perdida desde el respaldo
 ***
 ## tempcontrol.sh
 * Registra temperaturas altas en el procesador
