@@ -2,8 +2,8 @@
 ***Código para mi servidor Plex-Kodi, sobre raspbian lite, ejecutándose en una Raspberry pi4 2GB***  
 ****
 ## pelis.sh
-Realiza varias tareas con la colección de películas.
-Ahora, también incluye las funciones que ejecutaba 'pelisorden.sh'
+Realiza varias tareas con la colección de películas.  
+Ahora, también incluye las funciones que ejecutaba -'pelisorden.sh'-
 1. Crea listados de películas en almacenamiento y en respaldo
 2. Renombra las películas y los directorios que las alojan según plantilla
    * Crea directorios para archivos de vídeos con el nombre de la película y el año de estreno.  
@@ -15,8 +15,18 @@ Ahora, también incluye las funciones que ejecutaba 'pelisorden.sh'
    * Una vez encontrada una película la copia a la videoteca.  
    * Después de copiar la película acaba el programa.  
    * Este comportamiento permite que se ejecute desde el crontab cada cierto tiempo y que no ocupe demasiados recursos durante demasiado tiempo.  
-   **Ejemplos:**
+   **Ejemplos:**  
    ```pelis.sh -r dual```
+   ```pelis.sh -i VDE```
+   **Estructura de videoteca:**  
+   -/var/media/Cine/-  
+    *[dual]
+    *[es]
+    *[lat]
+    * [VDE]
+    * [VDL]
+    * [VO]
+    * [VOSE]
 4. Recupera una película perdida desde el respaldo
 ***
 ## tempcontrol.sh
