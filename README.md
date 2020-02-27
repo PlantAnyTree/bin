@@ -15,14 +15,14 @@ Ahora, también incluye las funciones que ejecutaba -'pelisorden.sh'-
    * Una vez encontrada una película la copia a la videoteca.  
    * Después de copiar la película acaba el programa.  
    * Este comportamiento permite que se ejecute desde el crontab cada cierto tiempo y que no ocupe demasiados recursos durante demasiado tiempo.  
-   **Ejemplos:**  
-   ```pelis.sh -r dual```
-   ```pelis.sh -i VDE```
-   **Estructura de videoteca:**  
-   -/var/media/Cine/-  
-    *[dual]
-    *[es]
-    *[lat]
+**Ejemplos:**  
+   ```pelis.sh -r dual```  
+   ```pelis.sh -i VDE```  
+**Estructura de videoteca:**  
+ -/var/media/Cine/-  
+    * [dual]
+    * [es]
+    * [lat]
     * [VDE]
     * [VDL]
     * [VO]
