@@ -21,9 +21,9 @@ Ahora, también incluye las funciones que ejecutaba -'pelisorden.sh'-
    ```pelis.sh -r dual```  
    ```pelis.sh -i VDE```  
 **Estructura de videoteca:**  
- +*/var/media/Cine/*  
- * [dual]
- * [es]
+ */var/media/Cine/*  
+* [dual]
+* [es]
 * [lat]
 * [VDE]
 * [VDL]
